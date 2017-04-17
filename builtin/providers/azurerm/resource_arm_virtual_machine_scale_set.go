@@ -298,6 +298,11 @@ func resourceArmVirtualMachineScaleSet() *schema.Resource {
 							Optional: true,
 						},
 
+						"managed_disk_type": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+
 						"vhd_containers": {
 							Type:     schema.TypeSet,
 							Optional: true,
@@ -1221,6 +1226,51 @@ func expandAzureRMVirtualMachineScaleSetsStorageProfileOsDisk(d *schema.Resource
 
 	return osDisk, nil
 
+}
+
+func expandAzureRMVirtualMachineScaleSetsStorageProfileDataDisk(d *schema.ResourceData) ([]compute.VirtualMachineScaleSetDataDisk, error) {
+	disks := d.Get("storage_profile_data_disk").([]interface{})
+	dataDisks := make([]compute.VirtualMachineScaleSetDataDisk, 0, len(disks))
+	for _, diskConfig := range disks {
+		config := diskConfig.(map[string]interface{})
+
+		name := config["name"].(string)
+		createOption := config["create_option"].(string)
+		managedDiskType := config["managed_disk_type"].(string)
+		lun := int32(config["lun"].(int))
+
+		dataDisk := compute.VirtualMachineScaleSetDataDisk{
+			Name:         &name,
+			Lun:          &lun,
+			CreateOption: compute.DiskCreateOptionTypes(createOption),
+		}
+
+		managedDiskVMSS := &compute.VirtualMachineScaleSetManagedDiskParameters{}
+
+		if managedDiskType != "" {
+			managedDiskVMSS.StorageAccountType = compute.StorageAccountTypes(managedDiskType)
+		} else {
+			managedDiskVMSS.StorageAccountType = compute.StorageAccountTypes(compute.StandardLRS)
+		}
+
+		//assume that data disks in VMSS can only be Managed Disks
+		dataDisk.ManagedDisk = managedDiskVMSS
+		//Name is not allowed with Managed Disks when used with VMSS (API Error)
+		dataDisk.Name = nil
+
+		if v := config["caching"].(string); v != "" {
+			dataDisk.Caching = compute.CachingTypes(v)
+		}
+
+		if v := config["disk_size_gb"]; v != nil {
+			diskSize := int32(config["disk_size_gb"].(int))
+			dataDisk.DiskSizeGB = &diskSize
+		}
+
+		dataDisks = append(dataDisks, dataDisk)
+	}
+
+	return dataDisks, nil
 }
 
 func expandAzureRMVirtualMachineScaleSetsStorageProfileDataDisk(d *schema.ResourceData) ([]compute.VirtualMachineScaleSetDataDisk, error) {
