@@ -47,6 +47,7 @@ type ArmClient struct {
 	vmScaleSetClient       compute.VirtualMachineScaleSetsClient
 	vmImageClient          compute.VirtualMachineImagesClient
 	vmClient               compute.VirtualMachinesClient
+	imageClient            compute.ImagesClient
 
 	diskClient disk.DisksClient
 
