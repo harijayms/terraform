@@ -333,39 +333,6 @@ func testCheckAzureRMVirtualMachineScaleSetHasLoadbalancer(name string) resource
 	}
 }
 
-func testCheckAzureRMVirtualMachineScaleSetHasManagedDisks(name string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		// Ensure we have enough information in state to look up in API
-		rs, ok := s.RootModule().Resources[name]
-		if !ok {
-			return fmt.Errorf("Not found: %s", name)
-		}
-
-		name := rs.Primary.Attributes["name"]
-		resourceGroup, hasResourceGroup := rs.Primary.Attributes["resource_group_name"]
-		if !hasResourceGroup {
-			return fmt.Errorf("Bad: no resource group found in state for virtual machine: scale set %s", name)
-		}
-
-		conn := testAccProvider.Meta().(*ArmClient).vmScaleSetClient
-		resp, err := conn.Get(resourceGroup, name)
-		if err != nil {
-			return fmt.Errorf("Bad: Get on vmScaleSetClient: %s", err)
-		}
-
-		if resp.StatusCode == http.StatusNotFound {
-			return fmt.Errorf("Bad: VirtualMachineScaleSet %q (resource group: %q) does not exist", name, resourceGroup)
-		}
-
-		managedDisk := resp.VirtualMachineProfile.StorageProfile.OsDisk.ManagedDisk
-		if managedDisk == nil {
-			return fmt.Errorf("Bad: Could not get data disks configurations for scale set %v", name)
-		}
-
-		return nil
-	}
-}
-
 func testCheckAzureRMVirtualMachineScaleSetOverprovision(name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		// Ensure we have enough information in state to look up in API
@@ -806,6 +773,7 @@ resource "azurerm_virtual_machine_scale_set" "test" {
   }
 
   storage_profile_os_disk {
+	name 		  = "mdtest"
     caching       = "ReadWrite"
     create_option = "FromImage"
     managed_disk_type = "Standard_LRS"
