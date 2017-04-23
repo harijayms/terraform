@@ -298,11 +298,6 @@ func resourceArmVirtualMachineScaleSet() *schema.Resource {
 							Optional: true,
 						},
 
-						"managed_disk_type": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-
 						"vhd_containers": {
 							Type:     schema.TypeSet,
 							Optional: true,
@@ -835,7 +830,6 @@ func flattenAzureRmVirtualMachineScaleSetStorageProfileOSDisk(profile *compute.V
 	}
 
 	if profile.Image != nil {
-		result["name"] = *profile.Name
 		result["image"] = *profile.Image.URI
 	}
 
@@ -965,7 +959,9 @@ func resourceArmVirtualMachineScaleSetSkuHash(v interface{}) int {
 func resourceArmVirtualMachineScaleSetStorageProfileOsDiskHash(v interface{}) int {
 	var buf bytes.Buffer
 	m := v.(map[string]interface{})
-	buf.WriteString(fmt.Sprintf("%s-", m["name"].(string)))
+	if m["name"] != nil {
+		buf.WriteString(fmt.Sprintf("%s-", m["name"].(string)))
+	}
 
 	if m["vhd_containers"] != nil {
 		buf.WriteString(fmt.Sprintf("%s-", m["vhd_containers"].(*schema.Set).List()))
@@ -1178,11 +1174,11 @@ func expandAzureRMVirtualMachineScaleSetsStorageProfileOsDisk(d *schema.Resource
 	osDiskConfig := osDiskConfigs[0].(map[string]interface{})
 	name := osDiskConfig["name"].(string)
 	image := osDiskConfig["image"].(string)
-	vhd_containers := osDiskConfig["vhd_containers"].(*schema.Set).List()
 	caching := osDiskConfig["caching"].(string)
 	osType := osDiskConfig["os_type"].(string)
 	createOption := osDiskConfig["create_option"].(string)
 	managedDiskType := osDiskConfig["managed_disk_type"].(string)
+	containers := osDiskConfig["vhd_containers"].(*schema.Set).List()
 
 	osDisk := &compute.VirtualMachineScaleSetOSDisk{
 		Caching:      compute.CachingTypes(caching),
@@ -1190,41 +1186,41 @@ func expandAzureRMVirtualMachineScaleSetsStorageProfileOsDisk(d *schema.Resource
 		CreateOption: compute.DiskCreateOptionTypes(createOption),
 	}
 
+	managedDiskVMSS := &compute.VirtualMachineScaleSetManagedDiskParameters{}
+
+	if managedDiskType != "" {
+		managedDiskVMSS.StorageAccountType = compute.StorageAccountTypes(managedDiskType)
+	} else {
+		managedDiskVMSS.StorageAccountType = compute.StorageAccountTypes(compute.StandardLRS)
+	}
+
+	if len(containers) > 0 && managedDiskType != "" {
+		return nil, fmt.Errorf("[ERROR] Conflict between `vhd_containers` and `managed_disk_type` (only one or the other can be used)")
+	}
+
+	//assume managed disks only if neither "image" nor "vhd_contaners" properties are referenced
 	if image != "" {
-		osDisk.Name = &name
 		osDisk.Image = &compute.VirtualHardDisk{
 			URI: &image,
 		}
-	}
+		osDisk.Name = &name
 
-	if len(vhd_containers) > 0 {
+	} else if len(containers) > 0 {
 		var vhdContainers []string
-		for _, v := range vhd_containers {
+		for _, v := range containers {
 			str := v.(string)
 			vhdContainers = append(vhdContainers, str)
 		}
-		osDisk.Name = &name
 		osDisk.VhdContainers = &vhdContainers
-	}
+		osDisk.Name = &name
 
-	managedDisk := &compute.VirtualMachineScaleSetManagedDiskParameters{}
-
-	if managedDiskType != "" {
-		managedDisk.StorageAccountType = compute.StorageAccountTypes(managedDiskType)
-		osDisk.ManagedDisk = managedDisk
+	} else {
+		osDisk.ManagedDisk = managedDiskVMSS
+		//'name' property should not be present with Managed Disk
 	}
-
-	//BEGIN: code to be removed after GH-13016 is merged
-	if image != "" && managedDiskType != "" {
-		return nil, fmt.Errorf("[ERROR] Conflict between `image` and `managed_disk_type` (only one or the other can be used)")
-	}
-
-	if len(vhd_containers) > 0 && managedDiskType != "" {
-		return nil, fmt.Errorf("[ERROR] Conflict between `vhd_containers` and `managed_disk_type` (only one or the other can be used)")
-	}
-	//END: code to be removed after GH-13016 is merged
 
 	return osDisk, nil
+
 }
 
 func expandAzureRMVirtualMachineScaleSetsStorageProfileDataDisk(d *schema.ResourceData) ([]compute.VirtualMachineScaleSetDataDisk, error) {

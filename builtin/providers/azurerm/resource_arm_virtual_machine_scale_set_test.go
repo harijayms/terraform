@@ -2,6 +2,7 @@ package azurerm
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"regexp"
 	"testing"
@@ -210,6 +211,8 @@ func TestAccAzureRMVirtualMachineScaleSet_osDiskTypeConflict(t *testing.T) {
 func testCheckAzureRMVirtualMachineScaleSetExists(name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		// Ensure we have enough information in state to look up in API
+		log.Printf("[INFO] testing VMSS with Managed Disks Creation - BEGIN.")
+
 		rs, ok := s.RootModule().Resources[name]
 		if !ok {
 			return fmt.Errorf("Not found: %s", name)
@@ -232,6 +235,7 @@ func testCheckAzureRMVirtualMachineScaleSetExists(name string) resource.TestChec
 			return fmt.Errorf("Bad: VirtualMachineScaleSet %q (resource group: %q) does not exist", name, resourceGroup)
 		}
 
+		log.Printf("[INFO] testing VMSS with Managed Disks Creation - END.")
 		return nil
 	}
 }
@@ -388,6 +392,39 @@ func testCheckAzureRMVirtualMachineScaleSetExtension(name string) resource.TestC
 		n := resp.VirtualMachineProfile.ExtensionProfile.Extensions
 		if n == nil || len(*n) == 0 {
 			return fmt.Errorf("Bad: Could not get extensions for scale set %v", name)
+		}
+
+		return nil
+	}
+}
+
+func testCheckAzureRMVirtualMachineScaleSetHasDataDisks(name string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		// Ensure we have enough information in state to look up in API
+		rs, ok := s.RootModule().Resources[name]
+		if !ok {
+			return fmt.Errorf("Not found: %s", name)
+		}
+
+		name := rs.Primary.Attributes["name"]
+		resourceGroup, hasResourceGroup := rs.Primary.Attributes["resource_group_name"]
+		if !hasResourceGroup {
+			return fmt.Errorf("Bad: no resource group found in state for virtual machine: scale set %s", name)
+		}
+
+		conn := testAccProvider.Meta().(*ArmClient).vmScaleSetClient
+		resp, err := conn.Get(resourceGroup, name)
+		if err != nil {
+			return fmt.Errorf("Bad: Get on vmScaleSetClient: %s", err)
+		}
+
+		if resp.StatusCode == http.StatusNotFound {
+			return fmt.Errorf("Bad: VirtualMachineScaleSet %q (resource group: %q) does not exist", name, resourceGroup)
+		}
+
+		storageProfile := resp.VirtualMachineProfile.StorageProfile.DataDisks
+		if storageProfile == nil || len(*storageProfile) == 0 {
+			return fmt.Errorf("Bad: Could not get data disks configurations for scale set %v", name)
 		}
 
 		return nil
@@ -736,7 +773,7 @@ resource "azurerm_virtual_machine_scale_set" "test" {
   }
 
   storage_profile_os_disk {
-	name 		  = "os-disk"
+	name 		  = "mdtest"
     caching       = "ReadWrite"
     create_option = "FromImage"
     managed_disk_type = "Standard_LRS"
