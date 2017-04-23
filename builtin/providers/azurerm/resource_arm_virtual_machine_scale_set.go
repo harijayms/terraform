@@ -298,11 +298,6 @@ func resourceArmVirtualMachineScaleSet() *schema.Resource {
 							Optional: true,
 						},
 
-						"managed_disk_type": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-
 						"vhd_containers": {
 							Type:     schema.TypeSet,
 							Optional: true,
