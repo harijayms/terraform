@@ -1219,11 +1219,6 @@ func expandAzureRMVirtualMachineScaleSetsStorageProfileOsDisk(d *schema.Resource
 		//'name' property should not be present with Managed Disk
 	}
 
-	} else {
-		osDisk.ManagedDisk = managedDiskVMSS
-		//'name' property should not be present with Managed Disk
-	}
-
 	return osDisk, nil
 
 }
