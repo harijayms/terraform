@@ -74,6 +74,12 @@ func resourceArmVirtualMachineScaleSet() *schema.Resource {
 				Optional: true,
 			},
 
+			"single_placement_group": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
+
 			"os_profile": {
 				Type:     schema.TypeSet,
 				Required: true,
@@ -443,6 +449,8 @@ func resourceArmVirtualMachineScaleSetCreate(d *schema.ResourceData, meta interf
 
 	updatePolicy := d.Get("upgrade_policy_mode").(string)
 	overprovision := d.Get("overprovision").(bool)
+	singlePlacementGroup := d.Get("single_placement_group").(bool)
+
 	scaleSetProps := compute.VirtualMachineScaleSetProperties{
 		UpgradePolicy: &compute.UpgradePolicy{
 			Mode: compute.UpgradeMode(updatePolicy),
@@ -453,7 +461,8 @@ func resourceArmVirtualMachineScaleSetCreate(d *schema.ResourceData, meta interf
 			OsProfile:        osProfile,
 			ExtensionProfile: extensions,
 		},
-		Overprovision: &overprovision,
+		Overprovision:        &overprovision,
+		SinglePlacementGroup: &singlePlacementGroup,
 	}
 
 	scaleSetParams := compute.VirtualMachineScaleSet{
@@ -513,6 +522,7 @@ func resourceArmVirtualMachineScaleSetRead(d *schema.ResourceData, meta interfac
 
 	d.Set("upgrade_policy_mode", properties.UpgradePolicy.Mode)
 	d.Set("overprovision", properties.Overprovision)
+	d.Set("single_placement_group", properties.SinglePlacementGroup)
 
 	osProfile, err := flattenAzureRMVirtualMachineScaleSetOsProfile(properties.VirtualMachineProfile.OsProfile)
 	if err != nil {
