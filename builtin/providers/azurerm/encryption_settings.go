@@ -2,6 +2,7 @@ package azurerm
 
 import (
 	"github.com/Azure/azure-sdk-for-go/arm/compute"
+	"github.com/Azure/azure-sdk-for-go/arm/disk"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -24,7 +25,7 @@ func encryptionSettingsSchema() *schema.Schema {
 
 				"disk_encryption_key": {
 					Type:     schema.TypeList,
-					Required: true,
+					Optional: true,
 					MaxItems: 1,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
@@ -63,7 +64,7 @@ func encryptionSettingsSchema() *schema.Schema {
 	}
 }
 
-func flattenRmDiskEncryptionSettings(encryptionSettings *compute.DiskEncryptionSettings) map[string]interface{} {
+func flattenVmDiskEncryptionSettings(encryptionSettings *compute.DiskEncryptionSettings) map[string]interface{} {
 	return map[string]interface{}{
 		"enabled": *encryptionSettings.Enabled,
 		"disk_encryption_key": []interface{}{
@@ -81,7 +82,25 @@ func flattenRmDiskEncryptionSettings(encryptionSettings *compute.DiskEncryptionS
 	}
 }
 
-func expandAzureRmDiskEncryptionSettings(settings map[string]interface{}) *compute.DiskEncryptionSettings {
+func flattenManagedDiskEncryptionSettings(encryptionSettings *disk.EncryptionSettings) map[string]interface{} {
+	return map[string]interface{}{
+		"enabled": *encryptionSettings.Enabled,
+		"disk_encryption_key": []interface{}{
+			map[string]interface{}{
+				"secret_url":      *encryptionSettings.DiskEncryptionKey.SecretURL,
+				"source_vault_id": *encryptionSettings.DiskEncryptionKey.SourceVault.ID,
+			},
+		},
+		"key_encryption_key": []interface{}{
+			map[string]interface{}{
+				"key_url":         *encryptionSettings.KeyEncryptionKey.KeyURL,
+				"source_vault_id": *encryptionSettings.KeyEncryptionKey.SourceVault.ID,
+			},
+		},
+	}
+}
+
+func expandVmDiskEncryptionSettings(settings map[string]interface{}) *compute.DiskEncryptionSettings {
 	enabled := settings["enabled"].(bool)
 	config := &compute.DiskEncryptionSettings{
 		Enabled: &enabled,
@@ -106,6 +125,37 @@ func expandAzureRmDiskEncryptionSettings(settings map[string]interface{}) *compu
 		config.KeyEncryptionKey = &compute.KeyVaultKeyReference{
 			KeyURL:      &secretURL,
 			SourceVault: &compute.SubResource{ID: &sourceVaultId},
+		}
+	}
+
+	return config
+}
+
+func expandManagedDiskEncryptionSettings(settings map[string]interface{}) *disk.EncryptionSettings {
+	enabled := settings["enabled"].(bool)
+	config := &disk.EncryptionSettings{
+		Enabled: &enabled,
+	}
+
+	if v := settings["disk_encryption_key"].([]interface{}); len(v) > 0 {
+		dek := v[0].(map[string]interface{})
+
+		secretURL := dek["secret_url"].(string)
+		sourceVaultId := dek["source_vault_id"].(string)
+		config.DiskEncryptionKey = &disk.KeyVaultAndSecretReference{
+			SecretURL:   &secretURL,
+			SourceVault: &disk.SourceVault{ID: &sourceVaultId},
+		}
+	}
+
+	if v := settings["key_encryption_key"].([]interface{}); len(v) > 0 {
+		kek := v[0].(map[string]interface{})
+
+		secretURL := kek["key_url"].(string)
+		sourceVaultId := kek["source_vault_id"].(string)
+		config.KeyEncryptionKey = &disk.KeyVaultAndKeyReference{
+			KeyURL:      &secretURL,
+			SourceVault: &disk.SourceVault{ID: &sourceVaultId},
 		}
 	}
 

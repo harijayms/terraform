@@ -220,7 +220,6 @@ func resourceArmVirtualMachine() *schema.Resource {
 						"managed_disk_id": {
 							Type:          schema.TypeString,
 							Optional:      true,
-							ForceNew:      true,
 							Computed:      true,
 							ConflictsWith: []string{"storage_data_disk.vhd_uri"},
 						},
@@ -1077,7 +1076,7 @@ func flattenAzureRmVirtualMachineOsDisk(disk *compute.OSDisk) []interface{} {
 	}
 
 	if es := disk.EncryptionSettings; es != nil {
-		result["encryption_settings"] = []interface{}{flattenRmDiskEncryptionSettings(es)}
+		result["encryption_settings"] = []interface{}{flattenVmDiskEncryptionSettings(es)}
 	}
 
 	return []interface{}{result}
@@ -1339,7 +1338,7 @@ func expandAzureRmVirtualMachineDataDisk(d *schema.ResourceData) ([]compute.Data
 		}
 		//END: code to be removed after GH-13016 is merged
 		if managedDiskID == "" && strings.EqualFold(string(data_disk.CreateOption), string(compute.Attach)) {
-			return nil, fmt.Errorf("[ERROR] Must specify managed disk id to attach to")
+			return nil, fmt.Errorf("[ERROR] If create_option is 'Attach', must specify the managed disk id to attach to")
 		}
 
 		if v := config["caching"].(string); v != "" {
@@ -1464,7 +1463,7 @@ func expandAzureRmVirtualMachineOsDisk(d *schema.ResourceData) (*compute.OSDisk,
 	}
 	//END: code to be removed after GH-13016 is merged
 	if managedDiskID == "" && strings.EqualFold(string(osDisk.CreateOption), string(compute.Attach)) {
-		return nil, fmt.Errorf("[ERROR] Must specify which disk to attach")
+		return nil, fmt.Errorf("[ERROR] If create_option is 'Attach', must specify the managed disk id to attach to")
 	}
 
 	if v := config["image_uri"].(string); v != "" {
@@ -1494,7 +1493,7 @@ func expandAzureRmVirtualMachineOsDisk(d *schema.ResourceData) (*compute.OSDisk,
 
 	if v := config["encryption_settings"].([]interface{}); len(v) > 0 {
 		encryptionSettings := v[0].(map[string]interface{})
-		es := expandAzureRmDiskEncryptionSettings(encryptionSettings)
+		es := expandVmDiskEncryptionSettings(encryptionSettings)
 		osDisk.EncryptionSettings = es
 	}
 

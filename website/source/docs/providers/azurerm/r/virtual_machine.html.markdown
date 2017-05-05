@@ -354,8 +354,8 @@ For more information on the different example configurations, please check out t
 
 `encryption_settings` supports the following:
 
-* `enabled` - (Required) Specifies if the encryption is enabled.
-* `disk_encryption_key` - (Required) Specifies the location of the disk encryption key using `secret_url` and `source_vault_id` subproperties.
+* `enabled` - (Required) Specifies if the encryption is enabled. If false, disk_encryption_key and key_encryption_key must not be specified.
+* `disk_encryption_key` - (Optional) Specifies the location of the disk encryption key using `secret_url` and `source_vault_id` subproperties. Must be specified if enabled is true.
 * `key_encryption_key` - (Optional) Specifies the location of the key encryption key using `key_url` and `source_vault_id` subproperties.
 
 ~> **Note:** An example `disk_encryption_key` could look like:
