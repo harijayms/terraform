@@ -1,11 +1,11 @@
 output "hostname" {
-  value = "${var.hostname}"
+  value = "${azurerm_redis_cache.redis.hostname}"
 }
 
-output "vm_fqdn" {
-  value = "${azurerm_public_ip.lbpip.fqdn}"
+output "db_fqdn" {
+  value = "${azurerm_sql_database.db.fully_qualified_domain_name}"
 }
 
-output "sshCommand" {
-  value = "ssh ${var.admin_username}@${azurerm_public_ip.lbpip.fqdn}"
+output "ssl_port" {
+  value = "${azurerm_redis_cache.redis.ssl_port}"
 }
