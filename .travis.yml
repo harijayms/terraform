@@ -12,10 +12,15 @@ git:
 # establish environment variables
 env:
   - TEST_DIR=examples/azure-vnet-to-vnet-peering
+  - TEST_DIR=examples/azure-traffic-manager-vm
+  - TEST_DIR=examples/azure-vm-from-user-image
+  - TEST_DIR=examples/azure-cdn-with-storage-account
+  - TEST_DIR=examples/azure-vm-simple-linux-managed-disk
+  - TEST_DIR=examples/azure-vnet-two-subnets
 
 branches:
   only:
-    - /^(?i:topic)-.*$/
+    - master
 
 # install terraform
 before_deploy:
@@ -29,5 +34,4 @@ deploy:
     script: cd $TRAVIS_BUILD_DIR/$TEST_DIR && ./deploy.ci.sh
     on:
       repo: harijayms/terraform
-      branch: topic-201-vnet-to-vnet-peering
-      # branch: master
+      branch: master
