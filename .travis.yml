@@ -17,7 +17,7 @@ branches:
   only:
     - /^(?i:topic)-.*$/
 
-install: ./install.ci.sh
+install: $TRAVIS_BUILD_DIR/$TEST_DIR/install.ci.sh
 
 before_deploy:
   - export KEY=$(cat /dev/urandom | tr -cd 'a-z' | head -c 12)
