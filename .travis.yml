@@ -15,10 +15,9 @@ env:
 
 branches:
   only:
-    - master
     - /^(?i:topic)-.*$/
 
-install: ./install.sh
+install: ./install.ci.sh
 
 before_deploy:
   - export KEY=$(cat /dev/urandom | tr -cd 'a-z' | head -c 12)
