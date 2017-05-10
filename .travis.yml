@@ -30,4 +30,4 @@ deploy:
     script: cd $TRAVIS_BUILD_DIR/$TEST_DIR && ./deploy.ci.sh
     on:
       repo: harijayms/terraform
-      branch: azure-sql-database-tranparent-encryption-create
+      branch: topic-201-sql-database-transparent-encryption-create
