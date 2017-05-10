@@ -10,15 +10,14 @@ resource "azurerm_resource_group" "rg" {
   location = "${var.location}"
 }
 
-resource "azurerm_sql_database" "db" {
-  name                             = "mysqldatabase"
-  resource_group_name              = "${azurerm_resource_group.rg.name}"
-  location                         = "${var.location}"
-  edition                          = "Basic"
-  collation                        = "SQL_Latin1_General_CP1_CI_AS"
-  create_mode                      = "Default"
-  requested_service_objective_name = "Basic"
-  server_name                      = "${azurerm_sql_server.server.name}"
+data "template_file" "enable_sql_tde" {
+  template = "${file("enable-sql-tde.ps1")}"
+
+  vars {
+    resource_group_name = "${var.resource_group}"
+    sql_server_name     = "${azurerm_sql_server.server.name}"
+    sql_database_name   = "mysqldatabase"
+  }
 }
 
 resource "azurerm_sql_server" "server" {
@@ -28,6 +27,21 @@ resource "azurerm_sql_server" "server" {
   version                      = "12.0"
   administrator_login          = "${var.sql_admin}"
   administrator_login_password = "${var.sql_password}"
+}
+
+resource "azurerm_sql_database" "db" {
+  name                             = "mysqldatabase"
+  resource_group_name              = "${azurerm_resource_group.rg.name}"
+  location                         = "${var.location}"
+  edition                          = "Basic"
+  collation                        = "SQL_Latin1_General_CP1_CI_AS"
+  create_mode                      = "Default"
+  requested_service_objective_name = "Basic"
+  server_name                      = "${azurerm_sql_server.server.name}"
+
+  provisioner "local-exec" {
+    command = "powershell -ExecutionPolicy Unrestricted -Command {${data.template_file.enable_sql_tde.rendered}}"
+  }
 }
 
 resource "azurerm_sql_firewall_rule" "fw" {
@@ -44,3 +58,4 @@ resource "azurerm_sql_firewall_rule" "fw" {
 # "apiVersion": "2014-04-01-preview",
 # "properties": {
 #   "status": "[parameters('transparentDataEncryption')]"
+
