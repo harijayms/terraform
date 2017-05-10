@@ -4,7 +4,7 @@ set -o errexit -o nounset
 
 terraform get
 terraform validate
-terraform plan -out=out.tfplan -var resource_group=$KEY -var sql_admin=$KEY -var sql_password=$PASSWORD
+terraform plan -out=out.tfplan -var resource_group=$KEY -var sql_admin=ImaSQLAdmin -var sql_password=$PASSWORD
 terraform apply out.tfplan
 terraform show
 
