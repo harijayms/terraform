@@ -40,7 +40,7 @@ resource "azurerm_sql_database" "db" {
   server_name                      = "${azurerm_sql_server.server.name}"
 
   provisioner "local-exec" {
-    command = "powershell -ExecutionPolicy Unrestricted -Command {${data.template_file.enable_sql_tde.rendered}}"
+    command = "powershell -ExecutionPolicy Unrestricted -Command ""& { ${data.template_file.enable_sql_tde.rendered} }"" "
   }
 }
 

@@ -2,11 +2,11 @@
 
 set -o errexit -o nounset
 
-terraform get
-terraform validate
-terraform plan -out=out.tfplan -var resource_group=$KEY -var sql_admin=ImaSQLAdmin -var sql_password=$PASSWORD
-terraform apply out.tfplan
-terraform show
+/opt/terraform/terraform get
+/opt/terraform/terraform validate
+/opt/terraform/terraform plan -out=out.tfplan -var resource_group=$KEY -var sql_admin=ImaSQLAdmin -var sql_password=$PASSWORD
+/opt/terraform/terraform apply out.tfplan
+/opt/terraform/terraform show
 
 # # check that resources exist via azure cli
 # docker run --rm -it \
