@@ -20,7 +20,7 @@ apt-get install -y --no-install-recommends powershell
 
 #Azure RM NetCore Preview Module Install
 powershell Install-Module AzureRM.NetCore.Preview -Force
-powershell Import-Module AzureRM.NetCore.Preview -Force
+powershell Import-Module AzureRM.NetCore.Preview
 if [[ $? -eq 0 ]]
     then
         echo "Successfully installed PowerShell Core with AzureRM NetCore Preview Module."
