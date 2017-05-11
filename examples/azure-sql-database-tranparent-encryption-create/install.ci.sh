@@ -18,6 +18,9 @@ curl https://packages.microsoft.com/config/ubuntu/14.04/prod.list | tee /etc/apt
 apt-get update
 apt-get install -y --no-install-recommends powershell
 
+# Install azure module
+powershell -Command "Install-Package -Name AzureRM.NetCore.Preview -Force"
+
 # install terraform
 curl https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip > terraform_${TERRAFORM_VERSION}_linux_amd64.zip
 
@@ -26,5 +29,3 @@ echo ${TERRAFORM_SHA256SUM}  terraform_${TERRAFORM_VERSION}_linux_amd64.zip > te
 sha256sum -c --quiet terraform_${TERRAFORM_VERSION}_SHA256SUMS
 
 unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip -d /bin
-
-rm -f terraform_${TERRAFORM_VERSION}_linux_amd64.zip
