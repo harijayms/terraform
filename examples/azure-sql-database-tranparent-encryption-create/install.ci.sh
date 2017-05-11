@@ -18,8 +18,15 @@ curl https://packages.microsoft.com/config/ubuntu/14.04/prod.list | tee /etc/apt
 apt-get update
 apt-get install -y --no-install-recommends powershell
 
-# Install azure module
-powershell -Command "Install-Package -Name AzureRM.NetCore.Preview -Force"
+#Azure RM NetCore Preview Module Install
+powershell Install-Module AzureRM.NetCore.Preview
+powershell Import-Module AzureRM.NetCore.Preview
+if [[ $? -eq 0 ]]
+    then
+        echo "Successfully installed PowerShell Core with AzureRM NetCore Preview Module."
+    else
+        echo "PowerShell Core with AzureRM NetCore Preview Module did not install successfully." >&2
+fi
 
 # install terraform
 curl https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip > terraform_${TERRAFORM_VERSION}_linux_amd64.zip
