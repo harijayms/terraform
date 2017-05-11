@@ -1,5 +1,5 @@
-password = ConvertTo-SecureString $ARM_CLIENT_SECRET -AsPlainText -Force
-cred = New-Object System.Management.Automation.PSCredential $ARM_CLIENT_ID password
+\$password = ConvertTo-SecureString $ARM_CLIENT_SECRET -AsPlainText -Force
+\$cred = New-Object System.Management.Automation.PSCredential $ARM_CLIENT_ID password
 
 Add-AzureRmAccount -Credential cred -TenantId $ARM_TENANT_ID -ServicePrincipal
 
