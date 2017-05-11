@@ -27,4 +27,4 @@ set -o errexit -o nounset
 #   10thmagnitude/terraform-ps \
 #   -c "/bin/terraform destroy -force -var resource_group=$KEY -var sql_admin=$KEY -var sql_password=$PASSWORD;"
 
-/bin/terraform destroy -force -var resource_group=$KEY -var sql_admin=$KEY -var sql_password=$PASSWORD
+# /bin/terraform destroy -force -var resource_group=$KEY -var sql_admin=$KEY -var sql_password=$PASSWORD
