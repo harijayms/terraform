@@ -7,6 +7,11 @@ variable "location" {
   default     = "southcentralus"
 }
 
+variable "sql_database_name" {
+  description = "The name of the database instance."
+  default     = "mysqldatabase"
+}
+
 variable "sql_admin" {
   description = "The administrator username of the SQL Server."
 }

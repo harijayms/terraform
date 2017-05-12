@@ -35,4 +35,4 @@ echo ${TERRAFORM_SHA256SUM}  terraform_${TERRAFORM_VERSION}_linux_amd64.zip > te
 
 sha256sum -c --quiet terraform_${TERRAFORM_VERSION}_SHA256SUMS
 
-unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip -d /bin
+unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip -d /opt/terraform/terraform

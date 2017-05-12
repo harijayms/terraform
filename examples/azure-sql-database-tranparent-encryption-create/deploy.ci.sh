@@ -2,11 +2,26 @@
 
 set -o errexit -o nounset
 
-/bin/terraform get
-/bin/terraform validate
-/bin/terraform plan -out=out.tfplan -var resource_group=$KEY -var sql_admin=ImaSQLAdmin -var sql_password=$PASSWORD
-/bin/terraform apply out.tfplan
-/bin/terraform show
+# /opt/terraform/terraform get
+# /opt/terraform/terraform validate
+# /opt/terraform/terraform plan -out=out.tfplan -var resource_group=$KEY -var sql_admin=ImaSQLAdmin -var sql_password=$PASSWORD
+# /opt/terraform/terraform apply out.tfplan
+# /opt/terraform/terraform show
+
+docker run --rm -it \
+  -e ARM_CLIENT_ID \
+  -e ARM_CLIENT_SECRET \
+  -e ARM_SUBSCRIPTION_ID \
+  -e ARM_TENANT_ID \
+  -v $(pwd):/data \
+  --workdir=/data \
+  --entrypoint "/bin/sh" \
+  hashicorp/terraform:light \
+  -c "/bin/terraform get; \
+      /bin/terraform validate; \
+      /bin/terraform plan -out=out.tfplan -var resource_group=$KEY -var sql_admin=ImaSQLAdmin -var sql_password=$PASSWORD -var dns_name=$KEY -var hostname=$KEY -var admin_password=$PASSWORD; \
+      /bin/terraform apply out.tfplan; \
+      /bin/terraform show;"
 
 # # check that resources exist via azure cli
 # docker run --rm -it \
@@ -28,3 +43,16 @@ set -o errexit -o nounset
 #   -c "/bin/terraform destroy -force -var resource_group=$KEY -var sql_admin=$KEY -var sql_password=$PASSWORD;"
 
 # /bin/terraform destroy -force -var resource_group=$KEY -var sql_admin=$KEY -var sql_password=$PASSWORD
+
+# docker run --rm -it \
+#   -e ARM_CLIENT_ID \
+#   -e ARM_CLIENT_SECRET \
+#   -e ARM_SUBSCRIPTION_ID \
+#   -e ARM_TENANT_ID \
+#   -v $(pwd):/data \
+#   --workdir=/data \
+#   --entrypoint "powershell" \
+#   10thmagnitude/terraform-ps \
+#   -ExecutionPolicy Unrestricted -Command "& {  }" "
+
+
