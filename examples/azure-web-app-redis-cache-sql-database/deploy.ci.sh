@@ -23,7 +23,7 @@ docker run --rm -it \
          az sql db show -g $KEY -n $KEY-db -s $KEY-sqlsvr; \
          az sql server show -g $KEY -n $KEY-sqlsvr; \
          az webapp show -n $KEY -g $KEY; \
-         az redis show -n $KEY -g $KEY;
+         az redis show -n $KEY -g $KEY;"
 
 # cleanup deployed azure resources via terraform
 docker run --rm -it \
