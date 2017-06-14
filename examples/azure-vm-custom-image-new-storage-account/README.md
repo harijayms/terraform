@@ -2,9 +2,9 @@
 
 This Terraform template was based on [this](https://github.com/Azure/azure-quickstart-templates/tree/master/201-vm-custom-image-new-storage-account) Azure Quickstart Template. Changes to the ARM template that may have occurred since the creation of this example may not be reflected here.
 
-This template allows you to create a new Virtual Machine from a custom image on a new storage account deployed together with the storage account, which means the source image VHD must be transferred to the newly created storage account before that Virtual Machine is deployed. This is accomplished by the usage of a transfer virtual machine that is deployed and then uses a script via custom script extension to copy the source VHD to the destination storage account. This process is used to overcome the limitation of the custom VHD that needs to reside at the same storage account where new virtual machines based on it will be spun up, the problem arises when you are also deploying the storage account within your template, since the storage account does not exist yet, how can you add the source VHDs beforehand?
+This template allows you to create a new Virtual Machine from a custom image on a new storage account deployed together with the storage account, which means the source image VHD must be transferred to the newly created storage account before that Virtual Machine is deployed. This is accomplished by the usage of a transfer virtual machine that is deployed and then uses a script via custom script extension to copy the source VHD to the destination storage account. This process is used to overcome the limitation of the custom VHD that needs to reside at the same storage account where new virtual machines based on it will be spun up. This problem arises when you are also deploying the storage account within your template; since the storage account does not exist yet, you are not able to add the source VHDs beforehand.
 
-Basically, it creates two VMs, one that is the transfer virtual machine and the second that is the actual virtual machine that is the goal of the deployment. Transfer VM can be removed later.
+To overcome that obstacle, this template creates two VMs, one that is the transfer virtual machine and the second that is the actual virtual machine that is the goal of the deployment. The transfer VM can be removed later.
 
 The process of this template is:
 
@@ -12,7 +12,7 @@ The process of this template is:
 2. Virtual NICs for both Virtual Machines
 3. Storage Account is created
 3. Transfer Virtual Machine gets deployed
-4. Transfer Virtual Machine starts the custom script extension to start the VHD copy from source to destination storage acounts
+4. Transfer Virtual Machine starts the custom script extension to start the VHD copy from source to destination storage accounts
 5. The new Virtual Machine based on a custom image VHD gets deployed 
 
 ## Requirements
