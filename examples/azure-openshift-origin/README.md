@@ -21,8 +21,8 @@ If you have a Red Hat subscription and would like to deploy an OpenShift Contain
 ### Generate SSH Keys
 
 You'll need to generate an SSH key pair in order to provision this template. Ensure that you do not include a passcode with the private key. <br/>
-If you are using a Windows computer, you can download `puttygen.exe`.  You will need to export to OpenSSH (from Conversions menu) to get a valid Private Key for use in the Template.<br/>
-From a Linux or Mac, you can just use the `ssh-keygen` command. Once you are finished deploying the cluster, you can always generate a new key pair that uses a passphrase and replaces the original one used during initial deployment.
+ - If you are using a Windows computer, you can download `puttygen.exe`.  You will need to export to OpenSSH (from Conversions menu) to get a valid Private Key for use in the Template.<br/>
+ - From a Linux or Mac, you can just use the `ssh-keygen` command. Once you are finished deploying the cluster, you can always generate a new key pair that uses a passphrase and replaces the original one used during initial deployment.
 
 ### Create Key Vault to store SSH Private Key
 
@@ -103,11 +103,11 @@ Ensure combination of openshiftMasterPublicIpDnsLabelPrefix, and nodeLbPublicIpD
 
 The OpenShift Ansible playbook does take a while to run when using VMs backed by Standard Storage. VMs backed by Premium Storage are faster. If you want Premimum Storage, select a DS or GS series VM.
 <hr />
-Be sure to follow the OpenShift instructions to create the ncessary DNS entry for the OpenShift Router for access to applications.
+Be sure to follow the OpenShift instructions to create the necessary DNS entry for the OpenShift Router for access to applications.
 
 ## Post-Deployment Operations
 
-This template creates an OpenShift user but does not make it a full OpenShift user.  To do that, please perform the following.
+This template creates an OpenShift user but does not make it a full OpenShift user.  To do that, please perform the following:
 
 1. SSH in to master node
 2. Execute the following command:
@@ -119,22 +119,22 @@ This template creates an OpenShift user but does not make it a full OpenShift us
  
 You can configure additional settings per the official [OpenShift Origin Documentation](https://docs.openshift.org/latest/welcome/index.html).
 
-Few options you have
+A few options you have:
 
 1. Deployment Output
 
-  a. openshiftConsoleUrl the openshift console url<br/>
-  b. openshiftMasterSsh  ssh command for master node<br/>
-  c. openshiftNodeLoadBalancerFQDN node load balancer<br/>
+  a. `openshiftConsoleUrl` - the openshift console url<br/>
+  b. `openshiftMasterSsh` - ssh command for master node<br/>
+  c. `openshiftNodeLoadBalancerFQDN` - node load balancer<br/>
 
-  get the deployment output data
+  Get the deployment output data.
 
-  a. portal.azure.com -> choose 'Resource groups' select your group select 'Deployments' and there the deployment 'Microsoft.Template'. As output from the deployment it contains information about the openshift console url, ssh command and load balancer url.<br/>
-  b. With the Azure CLI : azure group deployment list &lt;resource group name> 
+  a. portal.azure.com -> choose 'Resource groups', select your group, select 'Deployments', and then select the deployment 'Microsoft.Template'. As output from the deployment, it contains information about the openshift console url, ssh command, and load balancer url.<br/>
+  b. With the Azure CLI run: `azure group deployment list <resource group name>`
 
-2. add additional users. you can find much detail about this in the openshift.org documentation under 'Cluster Administration' and 'Managing Users'. This installation uses htpasswd as the identity provider. To add more user ssh in to master node and execute following command:
+2. Add additional users. You can find much detail about this in the openshift.org documentation under 'Cluster Administration' and 'Managing Users'. This installation uses `htpasswd` as the identity provider. To add more users, ssh into the master node and execute the following command:
 
    ```sh
    sudo htpasswd /etc/origin/master/htpasswd user1
    ```
-  now this user can login with the 'oc' CLI tool or the openshift console url
+  Now this user can login with the 'oc' CLI tool or the openshift console url.
